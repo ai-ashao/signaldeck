@@ -1,0 +1,12 @@
+services:
+  signaldeck:
+    build: .
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      - DATABASE_PATH=/app/data/signaldeck.db
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-}
+      - CRON_SECRET=${CRON_SECRET:-}
+    volumes:
+      - ./data:/app/data

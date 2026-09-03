@@ -1,0 +1,8 @@
+import { revalidatePath } from "next/cache";
+import { addRssSource, listSourceConfigs, updateSourceEnabled } from "@/lib/db/queries";
+export const dynamic="force-dynamic";
+async function toggle(formData:FormData){"use server";updateSourceEnabled(String(formData.get('id')),String(formData.get('enabled'))==='1');revalidatePath('/settings/sources');}
+async function add(formData:FormData){"use server";const name=String(formData.get('name')||'').trim();const feedUrl=String(formData.get('feedUrl')||'').trim();if(name&&feedUrl)addRssSource(name,feedUrl);revalidatePath('/settings/sources');}
+export default async function Sources(){const rows=listSourceConfigs();return <><div className="hero"><div><h1>Sources</h1><p className="muted">Zero-Key Policy：匿名 API / RSS / 公开页面优先，不要求注册第三方开发者账号。</p></div></div>
+<table className="table"><thead><tr><th>Source</th><th>Type</th><th>Config</th><th>Last fetch</th><th>Status</th></tr></thead><tbody>{rows.map((s:any)=><tr key={s.id}><td><b>{s.name}</b></td><td>{s.source_type}</td><td>{s.config.feedUrl||'Public endpoint'}</td><td>{s.last_fetched_at||'—'}</td><td><form action={toggle}><input type="hidden" name="id" value={s.id}/><input type="hidden" name="enabled" value={s.enabled?'0':'1'}/><button>{s.enabled?'Enabled':'Disabled'}</button></form></td></tr>)}</tbody></table>
+<h2>Add RSS / Atom</h2><form action={add} className="form"><div className="row"><div><label>Name</label><input name="name" required placeholder="Example: Vercel Blog"/></div><div><label>Feed URL</label><input name="feedUrl" type="url" required placeholder="https://example.com/feed.xml"/></div></div><div><button className="primary">Add feed</button></div></form></>}
